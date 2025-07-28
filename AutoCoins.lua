@@ -1,40 +1,62 @@
--- Interface personalizada com Auto Coins funcional configurável
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Allanursulino/ClimbAndJumpHub/main/MultiHubUILib.lua"))()
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Allanursulino/UILibs/main/Interface.lua"))()
-local Window = Library:CreateWindow("MultiHub - Auto Coins")
-local Tab = Window:CreateTab("Farm")
+local Window = Library:CreateWindow({
+    Title = "MultiHub - Climb And Jump Tower",
+    Center = true,
+    AutoShow = true
+})
 
--- Variáveis ajustáveis
+local Tabs = {
+    Farming = Window:AddTab("Farming"),
+}
+
+-- Variáveis
 local autoCoins = false
 local heightAmount = 15000
 local delaySeconds = 5
 
-local remote = game:GetService("ReplicatedStorage"):WaitForChild("ProMsgs"):WaitForChild("RemoteEvent")
-local coinID = 8270931980779 -- ID do objeto para coleta
-
--- Loop Auto Coins
-local function startAutoCoins()
-    while autoCoins and task.wait(delaySeconds) do
-        pcall(function()
-            remote:FireServer("JumpResults", coinID, heightAmount)
-        end)
+-- Input da Altura
+Tabs.Farming:AddInput("HeightAmount", {
+    Default = "15000",
+    Numeric = true,
+    Finished = true,
+    Text = "Height Amount",
+    Callback = function(value)
+        heightAmount = tonumber(value)
     end
-end
+})
 
--- Toggle Auto Coins
-Tab:CreateToggle("Ativar Auto Coins", false, function(state)
-    autoCoins = state
-    if state then
-        startAutoCoins()
+-- Slider de Delay
+Tabs.Farming:AddSlider("AutoCoinsDelay", {
+    Text = "Auto Coins Delay (s)",
+    Min = 1,
+    Max = 10,
+    Default = 5,
+    Rounding = 0,
+    Callback = function(value)
+        delaySeconds = value
     end
-end)
+})
 
--- Slider para altura
-Tab:CreateSlider("Height Amount", 0, 30000, heightAmount, function(val)
-    heightAmount = val
-end)
+-- Toggle para ativar/desativar Auto Coins
+Tabs.Farming:AddToggle("AutoCoins", {
+    Text = "Auto Coins",
+    Default = false,
+    Callback = function(value)
+        autoCoins = value
+    end
+})
 
--- Slider para delay
-Tab:CreateSlider("Delay (segundos)", 1, 30, delaySeconds, function(val)
-    delaySeconds = val
+-- Execução do Auto Coins
+task.spawn(function()
+    local remotePath = game:GetService("ReplicatedStorage"):WaitForChild("ProMsgs"):WaitForChild("RemoteEvent")
+    local coinID = 8270931980779 -- ID real usado ao detectar JumpResults
+    while true do
+        if autoCoins then
+            pcall(function()
+                remotePath:FireServer("JumpResults", coinID, heightAmount)
+            end)
+        end
+        task.wait(delaySeconds)
+    end
 end)

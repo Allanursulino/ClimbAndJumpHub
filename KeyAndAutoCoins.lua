@@ -96,7 +96,7 @@ local function verifyKey(key)
 end
 
 local function runMainScript()
-    local url = "https://raw.githubusercontent.com/SEU_USUARIO/ClimbAndJumpHub/main/AutoCoins.lua"
+    local url = "https://raw.githubusercontent.com/Allanursulino/ClimbAndJumpHub/main/AutoCoins.lua"
     loadstring(game:HttpGet(url))()
 end
 
